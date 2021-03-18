@@ -1,5 +1,6 @@
 library(readr)
 library(dplyr)
+library(writexl)
 
 #load in sensor data
 Lekagul_Sensor_Data <- read_csv("~/Documents/Spring2021/Visual Analytics/Spacey/DC3-data/Traffic Data/Lekagul Sensor Data.csv")
@@ -56,5 +57,13 @@ visitor_vehicles <- filter(Lekagul_Sensor_Data, CarType != '2P')
 visitor_vehicles <- arrange(visitor_vehicles, ID, .by_group = TRUE)
 
 
+#write excel files 
+write_xlsx(park_rangers, "park_rangers.xlsx")
+
+write_xlsx(sus_gate_vehicles, "sus_gate_vehicles.xlsx")
+
+write_xlsx(visitor_vehicles, "visitor_vehicles.xlsx")
+
+write_xlsx(arranged_data_by_ID,"arranged_data_by_ID.xlsx")
 
   
