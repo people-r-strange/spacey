@@ -21,3 +21,10 @@ Yes!
 There are 18708 vehicles in the park or which 998 are park rangers, which means 17710 are visitors. 
 
 2. How long are vehicles staying in the park? 
+-> Total length for each individual ID (Use difftime)
+
+3. Investigate Ranger Stop 3 
+-> Specific IDs 
+-> Look at Windspeed and Wind direction for specific dates
+-> Where were the trucks earlier that day (ISABEL)
+-> Determining groups by time (categorize by long-haulers, day trippers, etc.) (ISABEL + V)
