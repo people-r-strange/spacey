@@ -37,7 +37,11 @@ There are 18708 vehicles in the park of which 998 are park rangers, which means 
 -> Total length for each individual ID (Use difftime)
 
 ## **4. Investigate Ranger Stop 3**
+
 -> Specific IDs 
+
 -> Look at Windspeed and Wind direction for specific dates
+
 -> Where were the trucks earlier that day (ISABEL)
+
 -> Determining groups by time (categorize by long-haulers, day trippers, etc.) (ISABEL + V)
