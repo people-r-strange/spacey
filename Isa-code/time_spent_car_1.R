@@ -1,6 +1,8 @@
 library(tidyverse)
 library(knitr)
+library(plotly)
 #load sensor data
+
 sensor_data <- read_csv("data/Lekagul Sensor Data.csv")
 
 #renaming columnns
@@ -9,60 +11,13 @@ names(sensor_data)[2] <- "ID"
 names(sensor_data)[3] <- "CarType"
 names(sensor_data)[4] <- "GateName"
 
-#filter for most common car type
-car_1 <- sensor_data %>% filter(CarType == "1")
-
-car_1_count <- car_1 %>% group_by(GateName) %>% mutate(count = n()) %>% select(GateName,count)
-
-#Are there any NA's?
-colSums(is.na(car_1))
-
-#where do car 1's go?
-unique_gates_count <- distinct(car_1_count)
-
-ggplot(car_1, aes(x = GateName)) +
-  geom_histogram(stat = "count")+ 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-#how long do car 1's spend in each of these location, on average. 
-
-car_row <- car_1%>% rowwise(ID)
-
-car_time_spent <- car_1 %>% group_by(ID) %>% mutate(time_spent = difftime(lead(DateTime),DateTime, unit = "mins"))
-
-no_na <- car_time_spent %>% drop_na()
-
-spent <- no_na %>% group_by(GateName) %>% mutate(average_time = mean(time_spent), sd = sd(time_spent)) %>% select(GateName, average_time, sd)
-
-#where do car 1's go?
-unique_time <- distinct(spent)
-
-#visual of table
-ggplot(unique_time, aes(x = GateName, y = average_time)) +
-  geom_point()+ 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-
-#calculating standard deviation -- would this only make sense if it is normally distributed?
-
-unique_time <- no_na %>% group_by(GateName) 
-
-# unique_time$average_time[9:10] <- as.numeric(unique_time$average_time[9:10], units = "hours")
-# unique_time$average_time[13] <-  as.numeric(unique_time$average_time[13], units = "hours")
-# unique_time$average_time[16]
-# unique_time$average_time[18]
-# unique_time$average_time[19]
-# unique_time$average_time[20]
-# unique_time$average_time[22]
-# unique_time$average_time[24]
-# unique_time$average_time[25]
-
-#ok now do the same thing for each group of car
+#how much time each car type spent at each location 
 cars_time_spent <- sensor_data %>% group_by(ID) %>% mutate(time_spent = difftime(lead(DateTime),DateTime, unit = "mins"))
 
-no_na <- cars_time_spent %>% drop_na()
+no_na <- cars_time_spent %>% drop_na() #nas represent the exit 
 
 spent <- no_na %>% group_by(CarType,GateName) %>% mutate(average_time = mean(time_spent), sd = sd(time_spent)) %>% select(GateName, CarType, average_time, sd)
+
 #where do cars go?
 unique_cars_time <- distinct(spent)
 
@@ -72,8 +27,10 @@ camping_time_spent <- dplyr::filter(cars_time_spent, grepl('camping', GateName))
 #ranger only 
 ranger_time_spent <- dplyr::filter(cars_time_spent, grepl('ranger', GateName))
 
-#visualization
+#general gate only 
+general_gate_time_spent <- dplyr::filter(cars_time_spent, grepl('general-gate', GateName))
 
+#visualization average time spent in each gate
 ggplot(unique_cars_time, aes(x = GateName , y = average_time, col = CarType)) +
   geom_point()+ 
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -83,6 +40,12 @@ ggplot(unique_cars_time, aes(x = GateName , y = average_time, col = CarType)) +
 ggplot(camping_time_spent, aes(x = GateName, y = time_spent, col = CarType)) +
   geom_boxplot() +
   labs(title = "Time Spent in Camping Sites by Car Type", y = "Time (in minutes)", x = "Gate Name") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+#variation of time spent in general gate stations
+ggplot(general_gate_time_spent, aes(x = GateName, y = time_spent, col = CarType)) +
+  geom_boxplot() +
+  labs(title = "Time Spent in General Gate Sites by Car Type", y = "Time (in minutes)", x = "Gate Name") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 #variation of time spent in ranger stations
@@ -113,6 +76,23 @@ range3 <- ggplot(suspicious_rangers_3, aes(x = date, y = time, col = ID)) +
 ggplotly(range3)
 
 kable(suspicious_rangers_3)
+
+#where were the trucks beforehand?
+truck_id <- sensor_data %>% filter(ID %in% suspicious_rangers_3$ID) %>% group_by(ID) %>% mutate(num_trucks = n()) %>% ungroup() %>% group_by(GateName) %>% mutate(num_times_gate = n())
+
+#how much time did each ID spend in the park? 
+id_time_spent <- sensor_data %>% group_by(ID) %>% mutate(time_spent = difftime(tail(DateTime, n = 1L), DateTime[1], unit = "mins"))
+
+#visualizing how much time spent 
+id_time <- ggplot(id_time_spent, aes(y = time_spent)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Time Spent", y = "Time (Min, Military)", x = "Car Type")
+
+ggplotly(id_time)
+
+#this box plot is horrible but we have 60 minutes cruisers, 206 minutes (3 hours) day people, 3107 minutes (2 days) weekenders, 
+
 
 
 #Time series by month-year
