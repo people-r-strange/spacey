@@ -1,6 +1,7 @@
 library(readr)
 library(dplyr)
 library(writexl)
+library(tidyverse)
 
 #load in sensor data
 Lekagul_Sensor_Data <- read_csv("~/Documents/Spring2021/Visual Analytics/Spacey/DC3-data/Traffic Data/Lekagul Sensor Data.csv")
@@ -15,6 +16,12 @@ names(Lekagul_Sensor_Data)[4] <- "GateName"
 park_rangers <- filter(Lekagul_Sensor_Data, CarType == '2P')
 
 park_rangers_count <- n_distinct(park_rangers$ID)
+
+#filter out trucks 
+ 
+trucks <- filter(Lekagul_Sensor_Data, CarType == '3')
+
+trucks_count <- n_distinct(trucks$ID)
   
 #filter out any vehicles passing through gates that aren't park_rangers
 gate <- c('gate1', 'gate2', 'gate3', 'gate4', 'gate5', 'gate6', 'gate7', 'gate8')
@@ -28,6 +35,12 @@ sus_gate_vehicles <- arrange(sus_gate_vehicles, ID, .by_group = TRUE)
 
 #zeroing in on the sus IDs 
 sus_ID <- unique(sus_gate_vehicles[c("ID")])
+
+#visualizing the sus IDs
+ggplot(sus_gate_vehicles, aes(x=ID, fill = GateName)) + 
+  geom_bar() + 
+  theme(axis.text.x = element_text(angle = 55, hjust = 1)) +
+  labs(title = "Non-Park Ranger Vehicles at Park Ranger Gates", y = "Count", x = "CarType")
 
 #create vector of our sus_IDs
 sus_ID_group <- c('20154702044723-914',
