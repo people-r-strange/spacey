@@ -31,11 +31,11 @@ ranger_time_spent <- dplyr::filter(cars_time_spent, grepl('ranger', GateName))
 general_gate_time_spent <- dplyr::filter(cars_time_spent, grepl('general-gate', GateName))
 
 #visualization average time spent in each gate
-ggplot(unique_cars_time, aes(x = GateName , y = average_time, col = CarType)) +
-  geom_point()+ 
+p <- ggplot(unique_cars_time, aes(x = GateName , y = average_time, col = CarType)) +
+  geom_point(alpha = 0.5)+ 
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-
+ggplotly(p)
 #variation of time spent in camping site. 
 ggplot(camping_time_spent, aes(x = GateName, y = time_spent, col = CarType)) +
   geom_boxplot() +
@@ -91,6 +91,14 @@ id_time <- ggplot(id_time_spent, aes(y = time_spent)) +
 
 ggplotly(id_time)
 
+#join id time spent with coordinate data May made:
+geo_data <- read_csv("C:/Users/igome/Documents/Smith/Spring_2021/visual analyticsd/data challenge 3/data/DC3_coords.csv")
+
+names(geo_data)[1] <- "GateName"
+
+geo_truck_data <- left_join(truck_id,geo_data) %>% select(DateTime, ID, GateName, x_coord, y_coord)
+
+write_csv(geo_truck_data, "geo_truck_data.csv")
 #this box plot is horrible but we have 60 minutes cruisers, 206 minutes (3 hours) day people, 3107 minutes (2 days) weekenders, 
 
 
@@ -114,10 +122,12 @@ common_hour <- sensor_data %>% mutate(hour = as.numeric(format(DateTime,"%H"))) 
 
 
 #visualization 
-ggplot(common_hour, aes(x = GateName, y = hour, col = CarType)) +
+comm_hour_plot <- ggplot(common_hour, aes(x = GateName, y = hour, col = CarType)) +
   geom_point() +
+  labs(x = "Gate Name", y = "Hour (Military Time)", title = "Common Hours by Gate Name") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
         
+ggplotly(comm_hour_plot)
         
         
         
